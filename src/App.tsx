@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import './App.css'
+import { Input, Button, Checkbox, List, Typography, Empty, Space, theme } from 'antd'
+
+const { Title, Text } = Typography
 
 interface Todo {
   id: number
@@ -8,6 +10,7 @@ interface Todo {
 }
 
 function App() {
+  const { token } = theme.useToken()
   const [todos, setTodos] = useState<Todo[]>([])
   const [inputValue, setInputValue] = useState('')
 
@@ -36,49 +39,50 @@ function App() {
   const completedCount = todos.filter(t => t.completed).length
 
   return (
-    <div className="todo-app">
-      <h1>Todo App</h1>
+    <div style={{ maxWidth: 600, margin: '0 auto', padding: token.paddingXL }}>
+      <Title level={1} style={{ textAlign: 'center' }}>Todo App</Title>
 
-      <div className="todo-input-wrapper">
-        <input
-          type="text"
-          className="todo-input"
+      <Space.Compact style={{ width: '100%', marginBottom: token.marginMD }}>
+        <Input
           placeholder="What needs to be done?"
           value={inputValue}
           onChange={e => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
         />
-        <button className="todo-add-btn" onClick={addTodo}>
+        <Button type="primary" onClick={addTodo}>
           Add
-        </button>
-      </div>
+        </Button>
+      </Space.Compact>
 
       {todos.length > 0 && (
-        <p className="todo-stats">
+        <Text type="secondary" style={{ display: 'block', marginBottom: token.marginSM }}>
           {completedCount}/{todos.length} completed
-        </p>
+        </Text>
       )}
 
-      <ul className="todo-list">
-        {todos.map(todo => (
-          <li key={todo.id} className={`todo-item ${todo.completed ? 'completed' : ''}`}>
-            <label className="todo-label">
-              <input
-                type="checkbox"
+      {todos.length > 0 ? (
+        <List
+          dataSource={todos}
+          renderItem={todo => (
+            <List.Item
+              style={{ opacity: todo.completed ? 0.6 : 1 }}
+              actions={[
+                <Button type="text" danger onClick={() => deleteTodo(todo.id)}>
+                  Delete
+                </Button>
+              ]}
+            >
+              <Checkbox
                 checked={todo.completed}
                 onChange={() => toggleTodo(todo.id)}
-              />
-              <span className="todo-text">{todo.text}</span>
-            </label>
-            <button className="todo-delete-btn" onClick={() => deleteTodo(todo.id)}>
-              Delete
-            </button>
-          </li>
-        ))}
-      </ul>
-
-      {todos.length === 0 && (
-        <p className="todo-empty">No tasks yet. Add one above!</p>
+              >
+                <Text delete={todo.completed}>{todo.text}</Text>
+              </Checkbox>
+            </List.Item>
+          )}
+        />
+      ) : (
+        <Empty description="No tasks yet. Add one above!" />
       )}
     </div>
   )

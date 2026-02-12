@@ -1,6 +1,6 @@
 # Refactor Homepage — HTML/CSS sang ANTD Components
 
-> **Status:** Planning | **Created:** 2026-02-11
+> **Status:** Done | **Created:** 2026-02-11
 > **Module:** refactor-homepage
 
 ## 1. Mô tả
@@ -51,22 +51,22 @@ Giữ nguyên `useState` hiện tại — không thay đổi logic.
 ## 4. Implementation Phases
 
 ### Phase A: Setup ANTD Provider
-- [ ] A.1 - Wrap app với `<App>` provider trong main.tsx (import `App` từ antd)
-- [ ] A.2 - Xóa import App.css trong App.tsx
+- [x] A.1 - Wrap app với `<App>` provider trong main.tsx (import `App` từ antd)
+- [x] A.2 - Xóa import App.css trong App.tsx
 
 ### Phase B: Chuyển đổi Components
-- [ ] B.1 - Header: `<h1>` → `<Typography.Title level={1}>`
-- [ ] B.2 - Input + Button: `<input>` + `<button>` → `<Input>` + `<Button type="primary">` với `<Space.Compact>`
-- [ ] B.3 - Todo List: `<ul>` → `<List>` với `renderItem`
-- [ ] B.4 - Todo Item: checkbox + text + delete → `<Checkbox>` + `<Typography.Text>` + `<Button type="text" danger>`
-- [ ] B.5 - Stats: `<p>` → `<Typography.Text type="secondary">`
-- [ ] B.6 - Empty state: `<p>` → `<Empty>`
+- [x] B.1 - Header: `<h1>` → `<Typography.Title level={1}>`
+- [x] B.2 - Input + Button: `<input>` + `<button>` → `<Input>` + `<Button type="primary">` với `<Space.Compact>`
+- [x] B.3 - Todo List: `<ul>` → `<List>` với `renderItem`
+- [x] B.4 - Todo Item: checkbox + text + delete → `<Checkbox>` + `<Typography.Text>` + `<Button type="text" danger>`
+- [x] B.5 - Stats: `<p>` → `<Typography.Text type="secondary">`
+- [x] B.6 - Empty state: `<p>` → `<Empty>`
 
 ### Phase C: Styling với Theme Tokens
-- [ ] C.1 - Import `theme.useToken()` và thay hardcoded values bằng tokens
-- [ ] C.2 - Layout spacing dùng `token.marginMD`, `token.paddingLG`...
-- [ ] C.3 - Xóa file App.css
-- [ ] C.4 - Dọn index.css — giữ lại body reset, xóa phần không cần
+- [x] C.1 - Import `theme.useToken()` và thay hardcoded values bằng tokens
+- [x] C.2 - Layout spacing dùng `token.marginMD`, `token.paddingLG`...
+- [x] C.3 - Xóa file App.css
+- [x] C.4 - Dọn index.css — giữ lại body reset, xóa phần không cần
 
 ## 5. Notes
 
