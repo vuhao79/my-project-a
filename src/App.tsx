@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { Input, Button, Checkbox, List, Typography, Empty, Space, theme } from 'antd'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { Input, Button, Checkbox, List, Typography, Empty, Space, Spin, theme } from 'antd'
+import { supabase } from './lib/supabase'
 
 const { Title, Text } = Typography
 
@@ -7,29 +9,74 @@ interface Todo {
   id: number
   text: string
   completed: boolean
+  created_at: string
 }
 
 function App() {
   const { token } = theme.useToken()
-  const [todos, setTodos] = useState<Todo[]>([])
   const [inputValue, setInputValue] = useState('')
+  const queryClient = useQueryClient()
+
+  // READ: Fetch todos from Supabase
+  const { data: todos = [], isLoading } = useQuery({
+    queryKey: ['todos'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('todos')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) throw new Error(error.message)
+      return data as Todo[]
+    }
+  })
+
+  // CREATE: Add a new todo
+  const addMutation = useMutation({
+    mutationFn: async (text: string) => {
+      const { error } = await supabase
+        .from('todos')
+        .insert({ text })
+
+      if (error) throw new Error(error.message)
+    },
+    onSuccess: () => 
+      queryClient.invalidateQueries({ queryKey: ['todos'] }),
+  })
+
+  // UPDATE: Toggle todo completion
+  const toggleMutation = useMutation({
+    mutationFn: async ({id, completed} : {id: number, completed: boolean}) => {
+      const { error } = await supabase
+        .from('todos')
+        .update({ completed })
+        .eq('id', id)
+
+      if (error) throw new Error(error.message)
+    },
+    onSuccess: () => 
+      queryClient.invalidateQueries({ queryKey: ['todos'] }),
+  })
+
+  // DELETE: Remove a todo
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const { error } = await supabase
+        .from('todos')
+        .delete()
+        .eq('id', id)
+
+      if (error) throw new Error(error.message)
+    },
+    onSuccess: () => 
+      queryClient.invalidateQueries({ queryKey: ['todos'] }),
+  })
 
   const addTodo = () => {
     const trimmed = inputValue.trim()
     if (!trimmed) return
-
-    setTodos([...todos, { id: Date.now(), text: trimmed, completed: false }])
+    addMutation.mutate(trimmed)
     setInputValue('')
-  }
-
-  const toggleTodo = (id: number) => {
-    setTodos(todos.map(todo =>
-      todo.id === id ? { ...todo, completed: !todo.completed } : todo
-    ))
-  }
-
-  const deleteTodo = (id: number) => {
-    setTodos(todos.filter(todo => todo.id !== id))
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -37,6 +84,13 @@ function App() {
   }
 
   const completedCount = todos.filter(t => t.completed).length
+
+  if (isLoading) {
+    return (
+             <Spin style={{display: 'block', marginTop: 100}} size="large" />
+
+    )
+  }
 
   return (
     <div style={{ maxWidth: 600, margin: '0 auto', padding: token.paddingXL }}>
@@ -67,14 +121,14 @@ function App() {
             <List.Item
               style={{ opacity: todo.completed ? 0.6 : 1 }}
               actions={[
-                <Button type="text" danger onClick={() => deleteTodo(todo.id)}>
+                <Button type="text" danger onClick={() => deleteMutation.mutate(todo.id)}>
                   Delete
                 </Button>
               ]}
             >
               <Checkbox
                 checked={todo.completed}
-                onChange={() => toggleTodo(todo.id)}
+                onChange={() => toggleMutation.mutate({ id: todo.id, completed: !todo.completed })}
               >
                 <Text delete={todo.completed}>{todo.text}</Text>
               </Checkbox>
