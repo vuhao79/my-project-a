@@ -1,18 +1,20 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { App as AntdApp } from 'antd'
-import './index.css'
-import App from './App.tsx'
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { App as AntdApp } from "antd";
+import { queryClient } from "./lib/query-client";
+import { AuthProvider } from "./features/auth/context/AuthContext";
+import App from "./App";
+import "./index.css";
 
-const queryClient = new QueryClient()
-
-createRoot(document.getElementById('root')!).render(
+createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <AntdApp>
-        <App />
+        <AuthProvider>
+          <App />
+        </AuthProvider>
       </AntdApp>
     </QueryClientProvider>
   </StrictMode>,
-)
+);
