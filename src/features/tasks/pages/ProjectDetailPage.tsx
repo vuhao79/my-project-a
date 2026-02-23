@@ -8,6 +8,7 @@ import { TaskBoard } from "../components/TaskBoard";
 import { TaskFormModal } from "../components/TaskFormModal";
 import type { Task } from "../../../types/database";
 import { TaskFilters, type FilterValues } from "../components/TaskFilters";
+import type { DropResult } from "@hello-pangea/dnd";
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -73,6 +74,41 @@ export function ProjectDetailPage() {
     setModalOpen(false);
     setEditingTask(null);
   };
+  const handleDragEnd = (result: DropResult) => {
+    const { draggableId, source, destination } = result;
+    if (!destination) return;
+    if (
+      source.droppableId === destination.droppableId &&
+      source.index === destination.index
+    )
+      return;
+
+    const newStatus = destination.droppableId as Task["status"];
+
+    const destTasks = tasks
+      .filter((t) => t.status === newStatus && t.id !== draggableId)
+      .sort((a, b) => a.position - b.position);
+
+    let newPosition: number;
+    if (destTasks.length === 0) {
+      newPosition = 0;
+    } else if (destination.index === 0) {
+      newPosition = destTasks[0].position - 1;
+    } else if (destination.index >= destTasks.length) {
+      newPosition = destTasks[destTasks.length - 1].position + 1;
+    } else {
+      newPosition =
+        (destTasks[destination.index - 1].position +
+          destTasks[destination.index].position) /
+        2;
+    }
+
+    updateTask.mutate({
+      id: draggableId,
+      status: newStatus,
+      position: newPosition,
+    });
+  };
 
   return (
     <div>
@@ -128,7 +164,12 @@ export function ProjectDetailPage() {
       </Button>
       <TaskFilters filters={filters} onChange={setFilters} />
       {/* Board */}
-      <TaskBoard tasks={filteredTasks} onEdit={handleEdit} onDelete={handleDelete} />
+      <TaskBoard
+        tasks={filteredTasks}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onDragEnd={handleDragEnd}
+      />
 
       {/* Modal */}
       <TaskFormModal

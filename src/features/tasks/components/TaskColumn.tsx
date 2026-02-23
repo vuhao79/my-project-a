@@ -1,4 +1,5 @@
-import { Typography, Badge, theme } from 'antd'
+ import { Typography, Badge, theme } from 'antd'
+  import { Droppable, Draggable } from '@hello-pangea/dnd'
   import type { Task } from '../../../types/database'
   import { TaskCard } from './TaskCard'
 
@@ -52,16 +53,36 @@ import { Typography, Badge, theme } from 'antd'
           <Badge count={tasks.length} style={{ backgroundColor: config.color }} />
         </div>
 
-        <div style={{ minHeight: 100 }}>
-          {tasks.map((task) => (
-            <TaskCard
-              key={task.id}
-              task={task}
-              onEdit={onEdit}
-              onDelete={onDelete}
-            />
-          ))}
-        </div>
+        <Droppable droppableId={status}>
+          {(provided, snapshot) => (
+            <div
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+              style={{
+                minHeight: 100,
+                background: snapshot.isDraggingOver ? token.colorPrimaryBg : 'transparent',
+                borderRadius: token.borderRadius,
+                transition: 'background 0.2s',
+                padding: 2,
+              }}
+            >
+              {tasks.map((task, index) => (
+                <Draggable key={task.id} draggableId={task.id} index={index}>
+                  {(provided) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                    >
+                      <TaskCard task={task} onEdit={onEdit} onDelete={onDelete} />
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
       </div>
     )
   }

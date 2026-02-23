@@ -1,4 +1,5 @@
  import { Empty, theme } from 'antd'
+  import { DragDropContext, type DropResult } from '@hello-pangea/dnd'
   import type { Task } from '../../../types/database'
   import { TaskColumn } from './TaskColumn'
 
@@ -8,9 +9,10 @@
     tasks: Task[]
     onEdit: (task: Task) => void
     onDelete: (task: Task) => void
+    onDragEnd: (result: DropResult) => void
   }
 
-  export function TaskBoard({ tasks, onEdit, onDelete }: Props) {
+  export function TaskBoard({ tasks, onEdit, onDelete, onDragEnd }: Props) {
     const { token } = theme.useToken()
 
     if (tasks.length === 0) {
@@ -18,16 +20,18 @@
     }
 
     return (
-      <div style={{ display: 'flex', gap: token.marginMD, overflowX: 'auto' }}>
-        {statuses.map((status) => (
-          <TaskColumn
-            key={status}
-            status={status}
-            tasks={tasks.filter((t) => t.status === status)}
-            onEdit={onEdit}
-            onDelete={onDelete}
-          />
-        ))}
-      </div>
+      <DragDropContext onDragEnd={onDragEnd}>
+        <div style={{ display: 'flex', gap: token.marginMD, overflowX: 'auto' }}>
+          {statuses.map((status) => (
+            <TaskColumn
+              key={status}
+              status={status}
+              tasks={tasks.filter((t) => t.status === status)}
+              onEdit={onEdit}
+              onDelete={onDelete}
+            />
+          ))}
+        </div>
+      </DragDropContext>
     )
   }
